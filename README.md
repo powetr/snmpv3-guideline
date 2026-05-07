@@ -89,61 +89,86 @@ SNMPv3 (Simple Network Management Protocol version 3) — это стандар�
 
 Создание пользователя:
 
-systemctl stop snmpd
-net-snmp-config --create-snmpv3-user -a SHA -A AuthPass123 -x AES -X PrivPass123 myuserv3
-systemctl start snmpd
+`systemctl stop snmpd`
+
+`net-snmp-config --create-snmpv3-user -a SHA -A AuthPass123 -x AES -X PrivPass123 myuserv3`
+
+`systemctl start snmpd`
    
 ## 4. КОНФИГУРАЦИЯ snmpd.conf
 
-agentAddress udp:161
-engineID 0x8000000001020304
-view all_view included .1
-group MyGroup usm myuserv3
-access MyGroup "" usm authPriv exact all_view all_view none
-master agentx
-agentxsocket /var/agentx/master
-extend lld_docker /usr/local/bin/snmp-lld-docker.sh
-pass .1.3.6.1.4.1.9999.50 /bin/bash /usr/local/bin/snmp-control.sh
-trapsess -v3 -e 0x8000000001020304 -u myuserv3 -l authPriv -a SHA -A AuthPass123 -x AES -X PrivPass123 -n "system_events" 192.168.1.100:162
-authtrapenable 1
+`agentAddress udp:161`
+
+`engineID 0x8000000001020304`
+
+`view all_view included .1`
+
+`group MyGroup usm myuserv3`
+
+`access MyGroup "" usm authPriv exact all_view all_view none`
+
+`master agentx`
+
+`agentxsocket /var/agentx/master`
+
+`extend lld_docker /usr/local/bin/snmp-lld-docker.sh`
+
+`pass .1.3.6.1.4.1.9999.50 /bin/bash /usr/local/bin/snmp-control.sh`
+
+`trapsess -v3 -e 0x8000000001020304 -u myuserv3 -l authPriv -a SHA -A AuthPass123 -x AES -X PrivPass123 -n "system_events" 192.168.1.100:162`
+
+`authtrapenable 1`
 
 ## 5. ИНТЕРФЕЙС КАСТОМНЫХ СКРИПТОВ (EXTEND, PASS, AGENTX)
 
 А. Метод EXTEND (stdout)
 Конфиг: extend info_service /usr/local/bin/check_info.sh
+
 Вывод попадает в nsExtendOutputFull.
 
 Б. Метод PASS (LPC)
 
 Вход: $1 (-g/-n/-s), $2 (OID), $3 (Type), $4 (Value).
 Пример скрипта /usr/local/bin/snmp-postfix-queue.sh:
-#!/bin/bash
-OID=".1.3.6.1.4.1.9999.60.1"
-if [ "$1" = "-g" ]; then
-echo "$OID"; echo "gauge"; find /var/spool/postfix/active -type f | wc -l
-fi
+
+`#!/bin/bash`
+
+`OID=".1.3.6.1.4.1.9999.60.1"`
+
+`if [ "$1" = "-g" ]; then`
+`echo "$OID"; echo "gauge"; find /var/spool/postfix/active -type f | wc -l`
+`fi`
 
 В. Метод AgentX (Python)
 
 Файл /usr/local/bin/agentx-app.py:
-import pyagentx
-class MyUpdater(pyagentx.Updater):
-def update(self):
-self.set_value('.1.3.6.1.4.1.9999.10.1.0', 'Active', 'string')
-if name == "main":
-pyagentx.setup(socket='/var/agentx/master')
-pyagentx.Agent().register('1.3.6.1.4.1.9999.10', MyUpdater).start()
+
+`import pyagentx`
+`class MyUpdater(pyagentx.Updater):`
+`def update(self):`
+`self.set_value('.1.3.6.1.4.1.9999.10.1.0', 'Active', 'string')`
+`if name == "main":`
+`pyagentx.setup(socket='/var/agentx/master')`
+`pyagentx.Agent().register('1.3.6.1.4.1.9999.10', MyUpdater).start()`
 
 Г. Сервис Systemd для AgentX:
 
 [Unit]
+
 Description=Python AgentX Sub-agent
+
 After=snmpd.service
+
 [Service]
+
 ExecStart=/usr/bin/python3 /usr/local/bin/agentx-app.py
+
 Restart=always
+
 User=root
+
 [Install]
+
 WantedBy=multi-user.target
 
 ## 6. ИНТЕГРАЦИЯ В ZABBIX: LLD, ТРАПЫ И ПРЕПРОЦЕССИНГ
@@ -155,7 +180,9 @@ WantedBy=multi-user.target
 Препроцессинг в Zabbix (JavaScript):
 
 * IP Hex -> Dec: var hex = value.replace(/\s+/g, ''); var ip = []; for (var i = 0; i < hex.length; i += 2) { ip.push(parseInt(hex.substr(i, 2), 16)); } return ip.join('.');
+
 * Матчинг текста: return (value.match(/Error/i)) ? 1 : 0;
+
 * Удаление строк: return value.split('\n').filter(function (line) { return !line.match(/Debug/i); }).join('\n').trim();
 
 
@@ -164,14 +191,19 @@ WantedBy=multi-user.target
 А. snmptranslate, snmpget, snmpwalk:
 
 * snmptranslate -Td [OID]: Описание объекта и границ.
+
 * snmpget -d -v3 ...: HEX-дамп пакетов (проверка msgAuthParams и ScopedPDU).
+
 * snmpwalk -Dtsm -v3 ...: Отладка USM (дешифрация).
 
 Б. Анализ трафика (tcpdump):
 
 * tcpdump -i any -nn -vv -X port 161
+
 * Discovery: Пакет с пустым EngineID (0400).
+
 * Report: Пакет от агента с реальным EngineID.
+
 * Header v3: msgFlags 0x03 (authPriv).
 
 В. Управление (snmpset):
