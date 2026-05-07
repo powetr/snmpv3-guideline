@@ -1,8 +1,5 @@
-Ниже представлен полный текст гайдлайна в чистом текстовом формате (Markdown), оптимизированном для копирования в файл технической документации.
-------------------------------
-GUIDELINE: SNMPV3 ARCHITECTURE, ENGINEID, AGENTX AND ZABBIX INTEGRATION
+SNMPV3 ARCHITECTURE MEMO, ENGINEID, AGENTX AND ZABBIX INTEGRATION
 Version: 1.0.4-STABLE
-Status: FULL CONTEXT SNAPSHOT
 
    1. ФУНДАМЕНТАЛЬНАЯ ТЕОРИЯ И ИНФОРМАЦИОННЫЙ ОБМЕН SNMPV3
 
