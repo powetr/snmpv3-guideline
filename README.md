@@ -88,7 +88,7 @@ SNMPv3 (Simple Network Management Protocol version 3) — это стандар�
    net-snmp-config --create-snmpv3-user -a SHA -A AuthPass123 -x AES -X PrivPass123 myuserv3
    systemctl start snmpd
    
-4. КОНФИГУРАЦИЯ snmpd.conf (VACM, РОЛИ И ТРАПЫ)
+4. КОНФИГУРАЦИЯ snmpd.conf
 
 agentAddress udp:161
 engineID 0x8000000001020304
@@ -102,7 +102,7 @@ pass .1.3.6.1.4.1.9999.50 /bin/bash /usr/local/bin/snmp-control.sh
 trapsess -v3 -e 0x8000000001020304 -u myuserv3 -l authPriv -a SHA -A AuthPass123 -x AES -X PrivPass123 -n "system_events" 192.168.1.100:162
 authtrapenable 1
 
-5. ПОДРОБНЫЙ ИНТЕРФЕЙС КАСТОМНЫХ СКРИПТОВ (EXTEND, PASS, AGENTX)
+5. ИНТЕРФЕЙС КАСТОМНЫХ СКРИПТОВ (EXTEND, PASS, AGENTX)
 
 А. Метод EXTEND (stdout)
 Конфиг: extend info_service /usr/local/bin/check_info.sh
@@ -144,6 +144,7 @@ WantedBy=multi-user.target
 6. ИНТЕГРАЦИЯ В ZABBIX: LLD, ТРАПЫ И ПРЕПРОЦЕССИНГ
 
 Использование имен MIB:
+
 На сервере Zabbix выполнить apt install snmp-mibs-downloader && download-mibs. В /etc/snmp/snmp.conf добавить mibs +ALL.
 
 Препроцессинг в Zabbix (JavaScript):
