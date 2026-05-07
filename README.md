@@ -3,7 +3,7 @@ Simple memo guide SNMP V3 implementation
 SNMPV3 ARCHITECTURE MEMO, ENGINEID, AGENTX AND ZABBIX INTEGRATION
 Version: 1.0.4-STABLE
 
-## 1. ФУНДАМЕНТАЛЬНАЯ ТЕОРИЯ И ИНФОРМАЦИОННЫЙ ОБМЕН SNMPV3
+## 1. ИНФОРМАЦИОННЫЙ ОБМЕН SNMPV3
 
 SNMPv3 (Simple Network Management Protocol version 3) — это стандарт мониторинга, ориентированный на безопасность. Он использует модель безопасности USM (User-based Security Model) для защиты данных и VACM (View-based Access Control Model) для разграничения прав доступа.
 Ключевые RFC (стандарты протокола):
