@@ -79,10 +79,10 @@ SNMPv3 (Simple Network Management Protocol version 3) — это стандар�
 
 Базовый конфиг /etc/snmp/snmpd.conf:
 
-agentAddress udp:161
+`agentAddress udp:161
 sysLocation "Data Center 1"
 view systemview included .1
-rouser myuserv3 authPriv -V systemview
+rouser myuserv3 authPriv -V systemview`
 
 Создание пользователя:
 
