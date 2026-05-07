@@ -89,16 +89,13 @@ SNMPv3 (Simple Network Management Protocol version 3) — это стандар�
 
 agentAddress udp:161
 engineID 0x8000000001020304
-## Ролевая модель VACM
 view all_view included .1
 group MyGroup usm myuserv3
 access MyGroup "" usm authPriv exact all_view all_view none
-## Методы расширения
 master agentx
 agentxsocket /var/agentx/master
 extend lld_docker /usr/local/bin/snmp-lld-docker.sh
 pass .1.3.6.1.4.1.9999.50 /bin/bash /usr/local/bin/snmp-control.sh
-## Настройка Трапов## trapsess: -e [EngineID ПРИЕМНИКА], -n [Имя контекста]
 trapsess -v3 -e 0x8000000001020304 -u myuserv3 -l authPriv -a SHA -A AuthPass123 -x AES -X PrivPass123 -n "system_events" 192.168.1.100:162
 authtrapenable 1
 
